@@ -15,8 +15,6 @@ constructor(private readonly usersService: UsersService){}
     return this.usersService.findOne(+id)
     }
 
-
-
     @Post()
     createUser(@Body() user:{name:string, email:string, role:'INTERN' | 'ENGINEER' | 'ADMIN'}){
         return this.usersService.createUser(user)

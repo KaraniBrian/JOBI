@@ -1,0 +1,410 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model application_fields {
+  id                    String                  @id @db.Char(36)
+  application_form_id   String                  @db.Char(36)
+  field_name            String                  @db.VarChar(100)
+  field_label           String                  @db.VarChar(255)
+  field_type            String                  @db.VarChar(30)
+  placeholder           String?                 @db.VarChar(255)
+  help_text             String?                 @db.VarChar(500)
+  is_required           Boolean                 @default(false)
+  field_options         Json?
+  display_order         Int                     @default(0)
+  created_at            DateTime                @default(now()) @db.Timestamp(0)
+  updated_at            DateTime                @default(now()) @db.Timestamp(0)
+  application_forms     application_forms       @relation(fields: [application_form_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_application_field_form")
+  application_responses application_responses[]
+
+  @@index([application_form_id], map: "fk_application_field_form")
+}
+
+model application_forms {
+  id                 String               @id @db.Char(36)
+  job_id             String               @unique(map: "job_id") @db.Char(36)
+  title              String               @db.VarChar(255)
+  description        String?              @db.Text
+  is_active          Boolean              @default(true)
+  created_at         DateTime             @default(now()) @db.Timestamp(0)
+  updated_at         DateTime             @default(now()) @db.Timestamp(0)
+  application_fields application_fields[]
+  jobs               jobs                 @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_application_form_job")
+}
+
+model application_responses {
+  id                   String             @id @db.Char(36)
+  application_id       String             @db.Char(36)
+  application_field_id String             @db.Char(36)
+  response_text        String?            @db.Text
+  response_number      Decimal?           @db.Decimal(15, 4)
+  response_date        DateTime?          @db.DateTime(0)
+  file_url             String?            @db.VarChar(500)
+  created_at           DateTime           @default(now()) @db.Timestamp(0)
+  updated_at           DateTime           @default(now()) @db.Timestamp(0)
+  applications         applications       @relation(fields: [application_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_response_application")
+  application_fields   application_fields @relation(fields: [application_field_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_response_field")
+
+  @@unique([application_id, application_field_id], map: "uq_application_field_response")
+  @@index([application_field_id], map: "fk_response_field")
+}
+
+model applications {
+  id                    String                  @id @db.Char(36)
+  job_id                String                  @db.Char(36)
+  applicant_user_id     String                  @db.Char(36)
+  resume_id             String?                 @db.Char(36)
+  status                String                  @default("SUBMITTED") @db.VarChar(30)
+  applied_at            DateTime                @default(now()) @db.DateTime(0)
+  withdrawn_at          DateTime?               @db.DateTime(0)
+  created_at            DateTime                @default(now()) @db.Timestamp(0)
+  updated_at            DateTime                @default(now()) @db.Timestamp(0)
+  application_responses application_responses[]
+  users                 users                   @relation(fields: [applicant_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_application_applicant")
+  jobs                  jobs                    @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_application_job")
+  resumes               resumes?                @relation(fields: [resume_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_application_resume")
+  interviews            interviews[]
+
+  @@unique([job_id, applicant_user_id], map: "uq_application_job_applicant")
+  @@index([applicant_user_id], map: "fk_application_applicant")
+  @@index([resume_id], map: "fk_application_resume")
+}
+
+model audit_logs {
+  id          String   @id @db.Char(36)
+  user_id     String?  @db.Char(36)
+  action      String   @db.VarChar(100)
+  entity_type String   @db.VarChar(100)
+  entity_id   String?  @db.Char(36)
+  description String?  @db.Text
+  ip_address  String?  @db.VarChar(45)
+  user_agent  String?  @db.VarChar(500)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  users       users?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_audit_log_user")
+
+  @@index([user_id], map: "fk_audit_log_user")
+  @@index([entity_type, entity_id], map: "idx_audit_logs_entity")
+}
+
+model certifications {
+  id                   String    @id @db.Char(36)
+  resume_id            String    @db.Char(36)
+  certification_name   String    @db.VarChar(255)
+  issuing_organization String    @db.VarChar(255)
+  credential_id        String?   @db.VarChar(255)
+  issue_date           DateTime? @db.Date
+  expiry_date          DateTime? @db.Date
+  credential_url       String?   @db.VarChar(500)
+  description          String?   @db.Text
+  created_at           DateTime  @default(now()) @db.Timestamp(0)
+  updated_at           DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at           DateTime? @db.Timestamp(0)
+  resumes              resumes   @relation(fields: [resume_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_certification_resume")
+
+  @@index([resume_id], map: "fk_certification_resume")
+}
+
+model companies {
+  id                    String                  @id @db.Char(36)
+  owner_user_id         String                  @unique(map: "owner_user_id") @db.Char(36)
+  company_name          String                  @db.VarChar(255)
+  registration_number   String                  @unique(map: "registration_number") @db.VarChar(100)
+  tax_pin               String                  @unique(map: "tax_pin") @db.VarChar(100)
+  email                 String                  @unique(map: "email") @db.VarChar(255)
+  phone_number          String                  @db.VarChar(20)
+  website               String?                 @db.VarChar(255)
+  industry              String?                 @db.VarChar(100)
+  description           String?                 @db.Text
+  logo_url              String?                 @db.VarChar(500)
+  country               String                  @db.VarChar(100)
+  county                String                  @db.VarChar(100)
+  city                  String                  @db.VarChar(100)
+  physical_address      String                  @db.Text
+  postal_address        String?                 @db.VarChar(255)
+  verification_status   String                  @default("PENDING") @db.VarChar(20)
+  verified_at           DateTime?               @db.DateTime(0)
+  created_at            DateTime                @default(now()) @db.Timestamp(0)
+  updated_at            DateTime                @default(now()) @db.Timestamp(0)
+  deleted_at            DateTime?               @db.Timestamp(0)
+  users                 users                   @relation(fields: [owner_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_company_owner")
+  company_branches      company_branches[]
+  company_documents     company_documents[]
+  jobs                  jobs[]
+  verification_attempts verification_attempts[]
+}
+
+model company_branches {
+  id               String    @id @db.Char(36)
+  company_id       String    @db.Char(36)
+  branch_name      String    @db.VarChar(255)
+  country          String    @db.VarChar(100)
+  county           String    @db.VarChar(100)
+  city             String    @db.VarChar(100)
+  physical_address String    @db.Text
+  postal_address   String?   @db.VarChar(255)
+  phone_number     String?   @db.VarChar(20)
+  email            String?   @db.VarChar(255)
+  is_head_office   Boolean   @default(false)
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  updated_at       DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at       DateTime? @db.Timestamp(0)
+  companies        companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_branch_company")
+
+  @@index([company_id], map: "fk_branch_company")
+}
+
+model company_documents {
+  id                 String    @id @db.Char(36)
+  company_id         String    @db.Char(36)
+  document_type      String    @db.VarChar(100)
+  document_number    String?   @db.VarChar(100)
+  file_url           String    @db.VarChar(500)
+  original_file_name String?   @db.VarChar(255)
+  file_type          String?   @db.VarChar(100)
+  uploaded_at        DateTime  @default(now()) @db.DateTime(0)
+  expires_at         DateTime? @db.DateTime(0)
+  document_status    String    @default("PENDING") @db.VarChar(20)
+  rejection_reason   String?   @db.Text
+  created_at         DateTime  @default(now()) @db.Timestamp(0)
+  updated_at         DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at         DateTime? @db.Timestamp(0)
+  companies          companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_document_company")
+
+  @@index([company_id], map: "fk_document_company")
+}
+
+model education {
+  id               String    @id @db.Char(36)
+  resume_id        String    @db.Char(36)
+  institution_name String    @db.VarChar(255)
+  qualification    String    @db.VarChar(255)
+  field_of_study   String?   @db.VarChar(255)
+  start_date       DateTime? @db.Date
+  end_date         DateTime? @db.Date
+  description      String?   @db.Text
+  created_at       DateTime  @default(now()) @db.Timestamp(0)
+  updated_at       DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at       DateTime? @db.Timestamp(0)
+  resumes          resumes   @relation(fields: [resume_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_education_resume")
+
+  @@index([resume_id], map: "fk_education_resume")
+}
+
+model experience {
+  id              String    @id @db.Char(36)
+  resume_id       String    @db.Char(36)
+  company_name    String    @db.VarChar(255)
+  job_title       String    @db.VarChar(255)
+  employment_type String?   @db.VarChar(50)
+  location        String?   @db.VarChar(255)
+  start_date      DateTime  @db.Date
+  end_date        DateTime? @db.Date
+  is_current      Boolean   @default(false)
+  description     String?   @db.Text
+  created_at      DateTime  @default(now()) @db.Timestamp(0)
+  updated_at      DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at      DateTime? @db.Timestamp(0)
+  resumes         resumes   @relation(fields: [resume_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_experience_resume")
+
+  @@index([resume_id], map: "fk_experience_resume")
+}
+
+model interviews {
+  id                   String       @id @db.Char(36)
+  application_id       String       @db.Char(36)
+  scheduled_by_user_id String       @db.Char(36)
+  interview_type       String       @db.VarChar(30)
+  scheduled_at         DateTime     @db.DateTime(0)
+  duration_minutes     Int?
+  meeting_url          String?      @db.VarChar(500)
+  location             String?      @db.VarChar(500)
+  status               String       @default("SCHEDULED") @db.VarChar(30)
+  notes                String?      @db.Text
+  created_at           DateTime     @default(now()) @db.Timestamp(0)
+  updated_at           DateTime     @default(now()) @db.Timestamp(0)
+  deleted_at           DateTime?    @db.Timestamp(0)
+  applications         applications @relation(fields: [application_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_interview_application")
+  users                users        @relation(fields: [scheduled_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_interview_scheduler")
+
+  @@index([application_id], map: "fk_interview_application")
+  @@index([scheduled_by_user_id], map: "fk_interview_scheduler")
+}
+
+model job_categories {
+  id          String   @id @db.Char(36)
+  name        String   @unique(map: "name") @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+  jobs        jobs[]
+}
+
+model job_types {
+  id          String   @id @db.Char(36)
+  name        String   @unique(map: "name") @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+  jobs        jobs[]
+}
+
+model jobs {
+  id                   String             @id @db.Char(36)
+  company_id           String             @db.Char(36)
+  category_id          String             @db.Char(36)
+  job_type_id          String             @db.Char(36)
+  title                String             @db.VarChar(255)
+  description          String             @db.Text
+  requirements         String             @db.Text
+  responsibilities     String?            @db.Text
+  salary_min           Decimal?           @db.Decimal(12, 2)
+  salary_max           Decimal?           @db.Decimal(12, 2)
+  salary_currency      String             @default("KES") @db.VarChar(10)
+  location             String?            @db.VarChar(255)
+  is_remote            Boolean            @default(false)
+  application_deadline DateTime?          @db.DateTime(0)
+  status               String             @default("DRAFT") @db.VarChar(20)
+  published_at         DateTime?          @db.DateTime(0)
+  created_at           DateTime           @default(now()) @db.Timestamp(0)
+  updated_at           DateTime           @default(now()) @db.Timestamp(0)
+  deleted_at           DateTime?          @db.Timestamp(0)
+  application_forms    application_forms?
+  applications         applications[]
+  job_categories       job_categories     @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_category")
+  companies            companies          @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_company")
+  job_types            job_types          @relation(fields: [job_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_job_type")
+  saved_jobs           saved_jobs[]
+
+  @@index([category_id], map: "fk_job_category")
+  @@index([job_type_id], map: "fk_job_type")
+  @@index([company_id, status], map: "idx_jobs_company_status")
+  @@index([status, application_deadline], map: "idx_jobs_status_deadline")
+}
+
+model notifications {
+  id                String    @id @db.Char(36)
+  user_id           String    @db.Char(36)
+  title             String    @db.VarChar(255)
+  message           String    @db.Text
+  notification_type String    @db.VarChar(50)
+  is_read           Boolean   @default(false)
+  read_at           DateTime? @db.DateTime(0)
+  created_at        DateTime  @default(now()) @db.Timestamp(0)
+  updated_at        DateTime  @default(now()) @db.Timestamp(0)
+  users             users     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_notification_user")
+
+  @@index([user_id, is_read], map: "idx_notifications_user_read")
+}
+
+model resume_skills {
+  id                  String   @id @db.Char(36)
+  resume_id           String   @db.Char(36)
+  skill_id            String   @db.Char(36)
+  proficiency_level   String?  @db.VarChar(30)
+  years_of_experience Decimal? @db.Decimal(4, 1)
+  created_at          DateTime @default(now()) @db.Timestamp(0)
+  resumes             resumes  @relation(fields: [resume_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_resume_skill_resume")
+  skills              skills   @relation(fields: [skill_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_resume_skill_skill")
+
+  @@unique([resume_id, skill_id], map: "uq_resume_skill")
+  @@index([skill_id], map: "fk_resume_skill_skill")
+}
+
+model resumes {
+  id                   String           @id @db.Char(36)
+  user_id              String           @unique(map: "user_id") @db.Char(36)
+  professional_summary String?          @db.Text
+  resume_file_url      String?          @db.VarChar(500)
+  created_at           DateTime         @default(now()) @db.Timestamp(0)
+  updated_at           DateTime         @default(now()) @db.Timestamp(0)
+  deleted_at           DateTime?        @db.Timestamp(0)
+  applications         applications[]
+  certifications       certifications[]
+  education            education[]
+  experience           experience[]
+  resume_skills        resume_skills[]
+  users                users            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_resume_user")
+}
+
+model roles {
+  id          String   @id @db.Char(36)
+  name        String   @unique(map: "name") @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  created_at  DateTime @default(now()) @db.Timestamp(0)
+  updated_at  DateTime @default(now()) @db.Timestamp(0)
+  users       users[]
+}
+
+model saved_jobs {
+  id       String   @id @db.Char(36)
+  user_id  String   @db.Char(36)
+  job_id   String   @db.Char(36)
+  saved_at DateTime @default(now()) @db.Timestamp(0)
+  jobs     jobs     @relation(fields: [job_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_saved_job_job")
+  users    users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_saved_job_user")
+
+  @@unique([user_id, job_id], map: "uq_saved_job")
+  @@index([job_id], map: "fk_saved_job_job")
+}
+
+model skills {
+  id            String          @id @db.Char(36)
+  name          String          @unique(map: "name") @db.VarChar(100)
+  description   String?         @db.VarChar(255)
+  created_at    DateTime        @default(now()) @db.Timestamp(0)
+  updated_at    DateTime        @default(now()) @db.Timestamp(0)
+  resume_skills resume_skills[]
+}
+
+model users {
+  id                    String                  @id @db.Char(36)
+  role_id               String                  @db.Char(36)
+  first_name            String                  @db.VarChar(50)
+  last_name             String                  @db.VarChar(50)
+  email                 String                  @unique(map: "email") @db.VarChar(255)
+  phone_number          String                  @unique(map: "phone_number") @db.VarChar(20)
+  password_hash         String?                 @db.VarChar(255)
+  google_id             String?                 @unique(map: "google_id") @db.VarChar(255)
+  profile_photo_url     String?                 @db.VarChar(500)
+  email_verified        Boolean                 @default(false)
+  account_status        String                  @default("PENDING") @db.VarChar(20)
+  last_login_at         DateTime?               @db.DateTime(0)
+  created_at            DateTime                @default(now()) @db.Timestamp(0)
+  updated_at            DateTime                @default(now()) @db.Timestamp(0)
+  deleted_at            DateTime?               @db.Timestamp(0)
+  applications          applications[]
+  audit_logs            audit_logs[]
+  companies             companies?
+  interviews            interviews[]
+  notifications         notifications[]
+  resumes               resumes?
+  saved_jobs            saved_jobs[]
+  roles                 roles                   @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_role")
+  verification_attempts verification_attempts[]
+
+  @@index([role_id], map: "fk_users_role")
+}
+
+model verification_attempts {
+  id                  String    @id @db.Char(36)
+  company_id          String    @db.Char(36)
+  reviewed_by_user_id String?   @db.Char(36)
+  attempt_number      Int
+  status              String    @db.VarChar(20)
+  reason              String?   @db.Text
+  reviewed_at         DateTime? @db.DateTime(0)
+  created_at          DateTime  @default(now()) @db.Timestamp(0)
+  updated_at          DateTime  @default(now()) @db.Timestamp(0)
+  companies           companies @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_verification_company")
+  users               users?    @relation(fields: [reviewed_by_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_verification_reviewer")
+
+  @@index([company_id], map: "fk_verification_company")
+  @@index([reviewed_by_user_id], map: "fk_verification_reviewer")
+}
