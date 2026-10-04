@@ -1,21 +1,18 @@
 import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
    
-    // @Get() //Get for all users
-    // findAllUsers(){
-    //     return []
-    // }
-
+constructor(private readonly usersService: UsersService){}
     @Get()
-    onUser(@Query('role') role?: 'Intern' | 'Admin' | 'Normal'){
-        return [role]
+    findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN'){
+        return this.usersService.findAll(role)
     }
 
     @Get(':id') //Get using param
-    oneUser(@Param('id') id:string){
-    return {id}
+    findOne(@Param('id') id:string){
+    return this.usersService.findOne(+id)
     }
 
 
