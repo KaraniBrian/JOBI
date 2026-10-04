@@ -18,18 +18,18 @@ constructor(private readonly usersService: UsersService){}
 
 
     @Post()
-    createUser(@Body() user:{}){
-        return user
+    createUser(@Body() user:{name:string, email:string, role:'INTERN' | 'ENGINEER' | 'ADMIN'}){
+        return this.usersService.createUser(user)
     }
 
     @Patch(':id') //Updataing user
-    updateUser(@Param('id') id:string, @Body()  userupdated:{} ){
-        return {id, ...userupdated}
+    updateUser(@Param('id') id:string, @Body()  userupdated:{name:string, email:string, role?:'INTERN' | 'ENGINEER' | 'ADMIN'} ){
+        return this.usersService.updateUser(+id, userupdated)
     }
 
     @Delete(':id') //Delete using param
     deleteUser(@Param('id') id:string){
-    return (id)
+    return this.usersService.deleteUser(+id)
     }
 
 
