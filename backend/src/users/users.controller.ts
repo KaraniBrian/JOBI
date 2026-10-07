@@ -25,7 +25,7 @@ constructor(private readonly usersService: UsersService){}
         return this.usersService.updateUser(+id, userupdated)
     }
 
-    @Delete(':id') //Delete using param
+    @Delete(':id')
     deleteUser(@Param('id') id:string){
     return this.usersService.deleteUser(+id)
     }
