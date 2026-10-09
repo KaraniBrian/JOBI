@@ -1,35 +1,25 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+} from '@nestjs/common';
+
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-   
-constructor(private readonly usersService: UsersService){}
-    @Get()
-    findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN'){
-        return this.usersService.findAll(role)
-    }
+  constructor(private readonly usersService: UsersService) {}
 
-    @Get(':id') //Get using param
-    findOne(@Param('id') id:string){
-    return this.usersService.findOne(+id)
-    }
+  // GET /api/v1/users
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
 
-    @Post()
-    createUser(@Body() user:{name:string, email:string, role:'INTERN' | 'ENGINEER' | 'ADMIN'}){
-        return this.usersService.createUser(user)
-    }
-
-    @Patch(':id') //Updataing user
-    updateUser(@Param('id') id:string, @Body()  userupdated:{name:string, email:string, role?:'INTERN' | 'ENGINEER' | 'ADMIN'} ){
-        return this.usersService.updateUser(+id, userupdated)
-    }
-
-    @Delete(':id')
-    deleteUser(@Param('id') id:string){
-    return this.usersService.deleteUser(+id)
-    }
-
-
-
+  // GET /api/v1/users/:id
+  @Get(':id')
+  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.usersService.findOne(id);
+  }
 }
