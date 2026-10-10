@@ -6,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-export class RegisterJobSeekerDto {
+export class RegisterEmployerDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(50)
