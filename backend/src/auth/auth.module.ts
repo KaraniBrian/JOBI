@@ -2,9 +2,12 @@ import 'dotenv/config';
 
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 import { PrismaModule } from '../prisma/prisma.module';
 
@@ -20,6 +23,10 @@ if (!jwtSecret) {
   imports: [
     PrismaModule,
 
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+    }),
+
     JwtModule.register({
       secret: jwtSecret,
       signOptions: {
@@ -30,8 +37,15 @@ if (!jwtSecret) {
 
   controllers: [AuthController],
 
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    JwtStrategy,
+  ],
 
-  exports: [AuthService, JwtModule],
+  exports: [
+    AuthService,
+    JwtModule,
+    PassportModule,
+  ],
 })
 export class AuthModule {}
