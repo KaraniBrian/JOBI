@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { homeFor, useAuth } from './lib/auth';
 import { Layout, RequireRole } from './components/Layout';
-import { Loading } from './components/ui';
+import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import VerifyEmail from './pages/auth/VerifyEmail';
@@ -24,22 +23,16 @@ import UsersAdmin from './pages/admin/UsersAdmin';
 import Catalog from './pages/admin/Catalog';
 import AuditLog from './pages/admin/AuditLog';
 
-function Home() {
-  const { user, loading } = useAuth();
-  if (loading) return <Loading />;
-  return <Navigate to={user ? homeFor(user.role) : '/login'} replace />;
-}
-
 export function App() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/verify" element={<VerifyEmail />} />
       <Route path="/forgot" element={<ForgotPassword />} />
 
       <Route element={<Layout />}>
-        <Route index element={<Home />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/notifications" element={<Notifications />} />

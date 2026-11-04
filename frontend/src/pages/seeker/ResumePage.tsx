@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { EntryModal, type FieldSpec } from '../../components/EntryModal';
+import { FileInput } from '../../components/FileInput';
 import { useToast } from '../../components/toast';
 import { Button, ConfirmButton, Empty, ErrorNote, Field, FormError, Loading, Modal, PageHeader, Panel } from '../../components/ui';
 import { api } from '../../lib/api';
@@ -148,7 +149,11 @@ function CreateResume({ onCreated }: { onCreated: () => void }) {
       <Panel>
         <form className="form-grid" onSubmit={submit}>
           <Field label="Professional summary" wide><textarea placeholder="A few lines about you and the work you want." {...form.bind('professional_summary')} /></Field>
-          <Field label="Link to your CV file" hint="Optional. A link to a PDF you host elsewhere." wide><input type="url" {...form.bind('resume_file_url')} /></Field>
+          <div className="field field-wide">
+            <span className="field-label">Your CV file</span>
+            <FileInput value={form.values.resume_file_url} onChange={(url) => form.set('resume_file_url', url)} />
+            <span className="field-hint">Optional. PDF or Word, up to 5 MB.</span>
+          </div>
           <div className="field-wide"><FormError message={action.error} /></div>
           <div className="form-actions"><Button type="submit" busy={action.busy}>Create resume</Button></div>
         </form>
@@ -174,7 +179,11 @@ function Summary({ resume, onSaved }: { resume: Resume; onSaved: () => void }) {
     <Panel title="Summary">
       <form className="form-grid" onSubmit={submit}>
         <Field label="Professional summary" wide><textarea {...form.bind('professional_summary')} /></Field>
-        <Field label="Link to your CV file" wide><input type="url" {...form.bind('resume_file_url')} /></Field>
+        <div className="field field-wide">
+          <span className="field-label">Your CV file</span>
+          <FileInput value={form.values.resume_file_url} onChange={(url) => form.set('resume_file_url', url)} />
+          <span className="field-hint">PDF or Word, up to 5 MB. Employers can open it from your application.</span>
+        </div>
         <div className="field-wide"><FormError message={action.error} /></div>
         <div className="form-actions"><Button type="submit" busy={action.busy}>Save summary</Button></div>
       </form>

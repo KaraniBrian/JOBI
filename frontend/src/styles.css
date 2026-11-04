@@ -206,3 +206,59 @@ td .inline { gap: .4rem; }
   .filters { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- file picker ---------- */
+.file-pick { position: relative; display: inline-flex; cursor: pointer; }
+.file-pick input[type='file'] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.file-pick:focus-within { outline: 3px solid var(--fern); outline-offset: 2px; }
+.file-pick.is-busy { opacity: .6; cursor: progress; }
+.file-chip { display: flex; align-items: center; gap: .75rem; background: var(--mist); border: 1.5px solid var(--sage); border-radius: var(--radius-sm); padding: .4rem .5rem .4rem .8rem; overflow-wrap: anywhere; }
+.file-input { display: grid; gap: .4rem; }
+
+/* ---------- landing page ---------- */
+.land { min-height: 100vh; background: var(--mist); }
+.land-bar, .land-hero, .land-section, .land-foot { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+.land-bar { display: flex; align-items: center; gap: 1.5rem; padding: 1rem 0; }
+.land-links { display: flex; gap: 1.25rem; margin-right: auto; margin-left: 1rem; }
+.land-links a { text-decoration: none; color: var(--ink); font-weight: 500; }
+.land-links a:hover { text-decoration: underline; }
+.btn-lg { padding: .95rem 1.5rem; font-size: 1.02rem; }
+.land-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 2.5rem; align-items: center; padding: clamp(2rem, 6vw, 4.5rem) 0; }
+.land-hero-copy { display: grid; gap: 1.25rem; }
+.land-hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.2rem); max-width: 14ch; }
+.land-kicker { font-weight: 600; color: var(--fern-dark); }
+.land-lead { font-size: 1.12rem; color: var(--ink-soft); max-width: 52ch; }
+.land-art { position: relative; min-height: 380px; }
+.leaf { position: absolute; border-radius: 0 70% 0 70%; }
+.leaf-a { width: 78%; aspect-ratio: 1; right: 0; top: 2%; background: var(--sprout); }
+.leaf-b { width: 38%; aspect-ratio: 1; left: 4%; bottom: 4%; background: var(--fern); opacity: .9; transform: rotate(90deg); }
+.art-card { position: absolute; background: var(--paper); border: 1px solid var(--sage); border-radius: var(--radius); padding: .85rem 1.1rem; display: grid; gap: .1rem; box-shadow: 0 12px 30px rgba(23, 53, 42, .12); max-width: 250px; }
+.art-card span { color: var(--ink-soft); font-size: .88rem; }
+.art-1 { left: 0; top: 14%; }
+.art-2 { right: 2%; top: 44%; }
+.art-3 { left: 12%; bottom: 8%; }
+.land-section { padding: clamp(2rem, 5vw, 3.5rem) 0; }
+.land-section > .spread { margin-bottom: 1.25rem; }
+.land-jobs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.land-job { display: flex; gap: .9rem; align-items: flex-start; background: var(--paper); border: 1px solid var(--sage); border-left: 5px solid var(--fern); border-radius: var(--radius); padding: 1rem; text-decoration: none; color: inherit; }
+.land-job:hover { border-color: var(--fern); }
+.land-job h3 { font-size: 1.02rem; }
+.land-how h2 { margin-bottom: 1.25rem; }
+.land-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.steps li { display: flex; gap: .9rem; align-items: flex-start; }
+.step-no { flex: none; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: var(--sprout); color: var(--fern-dark); font-family: var(--font-head); font-weight: 700; }
+.land-band { background: var(--mist-deep); padding: clamp(2.5rem, 6vw, 4.5rem) 1rem; text-align: center; display: grid; gap: 1rem; justify-items: center; }
+.land-band p { max-width: 55ch; color: var(--ink-soft); }
+.land-foot { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.5rem 0; flex-wrap: wrap; }
+@media (max-width: 900px) {
+  .land-hero { grid-template-columns: 1fr; }
+  .land-art { min-height: 300px; order: -1; }
+  .land-jobs { grid-template-columns: 1fr 1fr; }
+  .land-links { display: none; }
+  .land-bar { justify-content: space-between; }
+}
+@media (max-width: 600px) {
+  .land-jobs, .land-cols { grid-template-columns: 1fr; }
+  .art-card { max-width: 200px; font-size: .9rem; }
+}

@@ -1,17 +1,22 @@
 import { useState, type FormEvent } from 'react';
 import { clean } from '../lib/api';
 import { useAction } from '../lib/hooks';
+import { FileInput, IMAGE_ACCEPT, DOC_ACCEPT } from './FileInput';
 import { Button, Field, FormError, Modal } from './ui';
 
 export interface FieldSpec {
   name: string;
   label: string;
-  type?: 'text' | 'date' | 'datetime-local' | 'number' | 'url' | 'email' | 'textarea' | 'checkbox' | 'select';
+  type?: 'text' | 'date' | 'datetime-local' | 'number' | 'url' | 'email' | 'textarea' | 'checkbox' | 'select' | 'file';
   required?: boolean;
   wide?: boolean;
   hint?: string;
   options?: { value: string; label: string }[];
   placeholder?: string;
+  /** For type 'file': only images are allowed (e.g. a logo). */
+  imageOnly?: boolean;
+  /** For type 'file': another field to fill with the uploaded file's name. */
+  fillName?: string;
 }
 
 /**
@@ -33,9 +38,12 @@ export function EntryModal({ title, fields, initial, submitLabel = 'Save', onClo
     return start;
   });
   const action = useAction();
+  const [uploading, setUploading] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    const missing = fields.find((f) => f.type === 'file' && f.required && !values[f.name]);
+    if (missing) { action.setError(`Please choose a file for “${missing.label}”.`); return; }
     const body: Record<string, unknown> = {};
     for (const f of fields) {
       const v = values[f.name];
@@ -60,6 +68,21 @@ export function EntryModal({ title, fields, initial, submitLabel = 'Save', onClo
               </div>
             );
           }
+          if (f.type === 'file') {
+            return (
+              <div key={f.name} className="field field-wide">
+                <span className="field-label">{f.label}</span>
+                <FileInput
+                  value={String(values[f.name])}
+                  accept={f.imageOnly ? IMAGE_ACCEPT : DOC_ACCEPT}
+                  onChange={(url) => set(url)}
+                  onBusyChange={setUploading}
+                  onUploaded={(fileName) => f.fillName && setValues((prev) => ({ ...prev, [f.fillName as string]: fileName }))}
+                />
+                {f.hint && <span className="field-hint">{f.hint}</span>}
+              </div>
+            );
+          }
           return (
             <Field key={f.name} label={f.label} hint={f.hint} wide={f.wide || f.type === 'textarea'}>
               {f.type === 'textarea' ? (
@@ -78,7 +101,7 @@ export function EntryModal({ title, fields, initial, submitLabel = 'Save', onClo
         <div className="field-wide"><FormError message={action.error} /></div>
         <div className="form-actions">
           <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button type="submit" busy={action.busy}>{submitLabel}</Button>
+          <Button type="submit" busy={action.busy} disabled={uploading}>{submitLabel}</Button>
         </div>
       </form>
     </Modal>

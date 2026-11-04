@@ -16,6 +16,8 @@ export class ApiError extends Error {
   }
 }
 
+export interface UploadResult { url: string; original_name: string; mime_type: string; size: number }
+
 type Query = Record<string, string | number | boolean | undefined | null>;
 
 function buildUrl(path: string, query?: Query) {
@@ -36,7 +38,9 @@ function readMessage(body: unknown, fallback: string): string {
 
 async function request<T>(method: string, path: string, body?: unknown, query?: Query, auth = true): Promise<T> {
   const headers: Record<string, string> = {};
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+  // For FormData the browser sets the multipart Content-Type (with its boundary) itself.
+  if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
   const token = tokenStore.get();
   if (auth && token) headers.Authorization = `Bearer ${token}`;
 
@@ -45,7 +49,7 @@ async function request<T>(method: string, path: string, body?: unknown, query?: 
     response = await fetch(buildUrl(path, query), {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? undefined : isForm ? (body as FormData) : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, 'Cannot reach the server. Check your connection and that the backend is running.');
@@ -67,6 +71,12 @@ export const api = {
   post: <T>(path: string, body?: unknown) => request<T>('POST', path, body ?? {}),
   patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body ?? {}),
   del: <T>(path: string) => request<T>('DELETE', path),
+  /** Uploads one file (PDF, Word, PNG, JPG, WebP; max 5 MB) and returns the URL to store on a record. */
+  upload: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return request<UploadResult>('POST', '/uploads', form);
+  },
   /** For endpoints that must work without a session (login, register, OTP, password reset). */
   publicPost: <T>(path: string, body: unknown) => request<T>('POST', path, body, undefined, false),
 };

@@ -15,7 +15,7 @@ const COMPANY_FIELDS: FieldSpec[] = [
   { name: 'phone_number', label: 'Company phone', required: true },
   { name: 'website', label: 'Website', type: 'url' },
   { name: 'industry', label: 'Industry' },
-  { name: 'logo_url', label: 'Logo link', type: 'url' },
+  { name: 'logo_url', label: 'Company logo', type: 'file', imageOnly: true, hint: 'PNG, JPG or WebP, up to 5 MB.' },
   { name: 'description', label: 'About the company', type: 'textarea' },
   { name: 'country', label: 'Country', required: true },
   { name: 'county', label: 'County', required: true },
@@ -37,7 +37,7 @@ const BRANCH_FIELDS: FieldSpec[] = [
 const DOC_FIELDS: FieldSpec[] = [
   { name: 'document_type', label: 'Document type', required: true, placeholder: 'e.g. Certificate of incorporation' },
   { name: 'document_number', label: 'Document number' },
-  { name: 'file_url', label: 'Link to the file', type: 'url', required: true, wide: true, hint: 'Upload the file to your storage and paste its link.' },
+  { name: 'file_url', label: 'Document file', type: 'file', required: true, fillName: 'original_file_name', hint: 'PDF, Word or image, up to 5 MB.' },
   { name: 'original_file_name', label: 'File name' },
   { name: 'expires_at', label: 'Expires', type: 'date' },
 ];

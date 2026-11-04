@@ -74,5 +74,16 @@ The schema stores these as plain strings; they are defined in `src/common/consta
 (company/document: `PENDING|APPROVED|REJECTED`; job: `DRAFT|PUBLISHED|CLOSED`; application:
 `SUBMITTED|UNDER_REVIEW|SHORTLISTED|INTERVIEW_SCHEDULED|OFFERED|HIRED|REJECTED|WITHDRAWN`).
 
+## Public endpoint
+`GET /public/jobs?limit=6` (no login, max 12) returns summary fields of the latest open jobs for the frontend landing page.
+
+## File uploads
+`POST /uploads` (any signed-in user, multipart field `file`) stores a PDF, Word, PNG, JPG or WebP file (max 5 MB) and
+returns `{ url, original_name, mime_type, size }`; save that `url` in `resume_file_url`, a document's `file_url`, `logo_url`
+or a FILE answer. Files are saved under `UPLOAD_DIR` (default `./uploads`) with random names and served from
+`GET /uploads/files/:name`. Anyone holding a file's link can open it, so the names are unguessable UUIDs.
+**On Render the disk is wiped on every deploy unless you attach a Persistent Disk** (mount it at e.g. `/var/data` and set
+`UPLOAD_DIR=/var/data/uploads`), or move storage to S3/Cloudinary.
+
 ## Scripts
 `start:dev` · `build` · `start:prod` · `db:generate` · `db:seed` · `test` · `test:e2e` · `lint`

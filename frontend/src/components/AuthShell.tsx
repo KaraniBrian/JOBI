@@ -5,7 +5,7 @@ export function AuthShell({ title, children }: { title: string; children: ReactN
   return (
     <div className="auth">
       <div className="auth-aside">
-        <Link to="/login" className="brand" style={{ padding: 0 }}><img src="/leaf.svg" alt="" />JOBI</Link>
+        <Link to="/" className="brand" style={{ padding: 0 }}><img src="/leaf.svg" alt="" />JOBI</Link>
         <div className="stack">
           <h1>Find work that fits. Hire people who stay.</h1>
           <ul>

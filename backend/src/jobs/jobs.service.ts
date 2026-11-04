@@ -68,7 +68,6 @@ export class JobsService {
         ],
       });
     }
-    
     if (query.category_id) and.push({ category_id: query.category_id });
     if (query.job_type_id) and.push({ job_type_id: query.job_type_id });
     if (query.company_id) and.push({ company_id: query.company_id });
@@ -81,6 +80,29 @@ export class JobsService {
       include: jobInclude,
       orderBy: [{ published_at: 'desc' }, { created_at: 'desc' }],
       ...pageArgs(query),
+    });
+  }
+
+  /** Latest open jobs for the public landing page (no login). Only summary fields are exposed. */
+  findPublic(limit = 6) {
+    return this.prisma.jobs.findMany({
+      where: openJobWhere(),
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        is_remote: true,
+        salary_min: true,
+        salary_max: true,
+        salary_currency: true,
+        application_deadline: true,
+        published_at: true,
+        companies: { select: { company_name: true, logo_url: true, city: true } },
+        job_types: { select: { name: true } },
+        job_categories: { select: { name: true } },
+      },
+      orderBy: [{ published_at: 'desc' }, { created_at: 'desc' }],
+      take: limit,
     });
   }
 

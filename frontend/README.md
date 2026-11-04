@@ -20,6 +20,7 @@ In development Vite proxies `/api` to the backend, so no CORS setup is needed.
 
 | Role | Pages |
 |---|---|
+| Visitors | A public landing page at `/` (hero, latest open jobs, how it works). Signed-in users are sent straight to their dashboard. |
 | Everyone | Sign in, register, verify email (6-digit code, resend with cooldown), forgot/reset password, notifications, profile |
 | Job seeker | Find jobs (search, category, type, remote), job detail with a dynamic apply form built from the employer's questions, my applications (details, withdraw), saved jobs, resume (summary, experience, education, certifications, skills), interviews |
 | Employer | My jobs (create, edit, publish, close, delete), application form builder, applicants (filter, review, change status), applicant detail with resume and answers, schedule interviews, company profile, branches, documents, verification request |
@@ -37,7 +38,7 @@ In development Vite proxies `/api` to the backend, so no CORS setup is needed.
 
 ## Notes
 
-- There is no file-upload endpoint in the backend, so documents, CV files and file answers are entered as links.
+- CVs, company documents, logos and file answers are uploaded from the computer (PDF, Word, PNG, JPG, WebP; max 5 MB) through the backend's `POST /uploads`.
 - Resume entries (experience, education, certifications) can be added and removed; to change one, remove and re-add it.
 - Clearing an optional field on an existing record isn't supported yet (empty values are not sent).
 - Fonts load from Google Fonts with system fallbacks.

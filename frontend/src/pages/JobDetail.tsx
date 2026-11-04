@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { FileInput } from '../components/FileInput';
 import { useToast } from '../components/toast';
 import { Button, ErrorNote, Field, FormError, Loading, PageHeader, Panel, Seal, StatusBadge } from '../components/ui';
 import { api, ApiError } from '../lib/api';
@@ -103,11 +104,15 @@ function ApplyPanel({ job }: { job: Job }) {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const responses = fields.map(toResponse).filter(Boolean);
-    const created = await action.run(() => api.post<Application>('/applications', {
+    const created = await action.run(async () => {
+      const missing = fields.find((f) => f.field_type === 'FILE' && f.is_required && !answers[f.id]?.file);
+      if (missing) throw new Error(`Please upload a file for “${missing.field_label}”.`);
+      return api.post<Application>('/applications', {
       job_id: job.id,
       ...(attach && resume.data ? { resume_id: resume.data.id } : {}),
       ...(responses.length ? { responses } : {}),
-    }));
+      });
+    });
     if (created) {
       notify("Application sent. We'll tell you when the employer responds.");
       existing.reload();
@@ -171,17 +176,17 @@ function FieldInput({ field, answer, onChange }: { field: AppField; answer: Answ
     case 'CHECKBOX':
       control = <label className="check"><input type="checkbox" required={req} checked={answer.checked ?? false} onChange={(e) => onChange({ checked: e.target.checked })} />{field.placeholder || 'Yes'}</label>; break;
     case 'FILE':
-      control = <input type="url" required={req} placeholder="https://…" value={answer.file ?? ''} onChange={(e) => onChange({ file: e.target.value })} />; break;
+      control = <FileInput value={answer.file ?? ''} onChange={(url) => onChange({ file: url })} />; break;
     default:
       control = <input required={req} placeholder={field.placeholder ?? ''} value={answer.text ?? ''} onChange={(e) => onChange({ text: e.target.value })} />;
   }
 
   // Groups of checkboxes/radios are labelled with a div so each option keeps its own label.
-  const grouped = ['RADIO', 'MULTISELECT', 'CHECKBOX'].includes(field.field_type);
+  const grouped = ['RADIO', 'MULTISELECT', 'CHECKBOX', 'FILE'].includes(field.field_type);
   return grouped ? (
     <div className="field"><span className="field-label">{label}</span>{control}{field.help_text && <span className="field-hint">{field.help_text}</span>}</div>
   ) : (
-    <Field label={label} hint={field.help_text ?? (field.field_type === 'FILE' ? 'Paste a link to your file.' : undefined)}>{control}</Field>
+    <Field label={label} hint={field.help_text ?? (field.field_type === 'FILE' ? 'PDF, Word or image, up to 5 MB.' : undefined)}>{control}</Field>
   );
 }
 
