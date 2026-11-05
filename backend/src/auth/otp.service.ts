@@ -85,7 +85,7 @@ export class OtpService {
       return 'COOLDOWN';
     }
 
-    const recent = await this.prisma.email_verification_otps.count({
+21    const recent = await this.prisma.email_verification_otps.count({
       where: {
         user_id: userId,
         purpose,
