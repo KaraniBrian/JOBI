@@ -34,6 +34,7 @@ const applicantSummary = {
     email: true,
     phone_number: true,
     profile_photo_url: true,
+
   },
 } as const;
 
