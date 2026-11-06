@@ -15,6 +15,7 @@ export default function Register() {
   const [kind, setKind] = useState<Kind>(params.get('role') === 'employer' ? 'employer' : 'job-seeker');
   const form = useForm({ first_name: '', last_name: '', email: '', phone_number: '', password: '' });
   const action = useAction();
+  const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -41,11 +42,16 @@ export default function Register() {
           </label>
         </div>
         <div className="form-grid">
-          <Field label="First name"><input required maxLength={50} autoComplete="given-name" {...form.bind('first_name')} /></Field>
-          <Field label="Last name"><input required maxLength={50} autoComplete="family-name" {...form.bind('last_name')} /></Field>
-          <Field label="Email" wide><input type="email" required autoComplete="email" {...form.bind('email')} /></Field>
-          <Field label="Phone number" wide><input type="tel" required maxLength={20} autoComplete="tel" placeholder="+254 700 000000" {...form.bind('phone_number')} /></Field>
-          <Field label="Password" hint="At least 8 characters." wide><input type="password" required minLength={8} maxLength={128} autoComplete="new-password" {...form.bind('password')} /></Field>
+          <Field label="First name"><input required maxLength={50} placeholder="Enter first name" autoComplete="given-name" {...form.bind('first_name')} /></Field>
+          <Field label="Last name"><input required placeholder = "Enter last name" maxLength={50} autoComplete="family-name" {...form.bind('last_name')} /></Field>
+          <Field label="Email" wide><input type="email" placeholder="Enter email" required autoComplete="email" {...form.bind('email')} /></Field>
+          <Field label="Phone number" wide><input type="tel" required maxLength={20} placeholder="+254 700 000000" autoComplete="tel" {...form.bind('phone_number')} /></Field>
+          <Field label="Password" hint="At least 8 characters." wide><input type={showPassword ? 'text' : 'password'} required placeholder="Enter password" minLength={8} maxLength={128} autoComplete="new-password" {...form.bind('password')} />
+          <label><input
+    type="checkbox"
+    checked={showPassword}
+    onChange={(e) => setShowPassword(e.target.checked)}
+  /> Show Password</label></Field>
         </div>
         <FormError message={action.error} />
         <Button type="submit" busy={action.busy}>Create account</Button>
