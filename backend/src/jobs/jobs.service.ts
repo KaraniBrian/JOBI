@@ -10,7 +10,7 @@ import { pageArgs } from '../common/pagination.dto';
 import { CreateJobDto } from './dto/create-jobs.dto';
 import { ListJobsQueryDto, UpdateJobDto } from './dto/update-jobs.dto';
 
-/** A job that job seekers can see and apply to right now. */
+/** A job that job seekers can see and apply to right now. */ 
 export function openJobWhere(now = new Date()): Prisma.jobsWhereInput {
   return {
     status: JOB_STATUS.PUBLISHED,
