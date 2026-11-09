@@ -65,6 +65,16 @@ export class OtpService {
         'Unable to send the verification email. Please try again later.',
       );
     }
+    const dbInfo = await this.prisma.$queryRaw`
+  SELECT
+    @@hostname AS hostname,
+    @@port AS port,
+    DATABASE() AS database_name,
+    @@read_only AS read_only,
+    @@super_read_only AS super_read_only
+`;
+
+console.log('DATABASE DIAGNOSTICS:', dbInfo);
   }
 
   /** Whether a new OTP may be sent now (60s cooldown, 5 per hour). */
