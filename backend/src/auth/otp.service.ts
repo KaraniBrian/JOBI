@@ -30,16 +30,6 @@ export class OtpService {
 
   /** Generate, hash, store and email a new OTP, invalidating older unused ones. */
   async issue(userId: string, email: string, purpose: OtpPurpose): Promise<void> {
-    const dbInfo = await this.prisma.$queryRaw`
-  SELECT
-    @@hostname AS hostname,
-    @@port AS port,
-    DATABASE() AS database_name,
-    @@read_only AS read_only,
-    @@super_read_only AS super_read_only
-`;
-
-console.log('DATABASE DIAGNOSTICS:', dbInfo);
     const otp = randomInt(100000, 1000000).toString();
     const otpHash = await bcrypt.hash(otp, 12);
     const now = new Date();
