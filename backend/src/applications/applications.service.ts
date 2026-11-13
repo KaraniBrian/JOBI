@@ -294,6 +294,7 @@ export class ApplicationsService {
         where: { id },
         data: { status: APPLICATION_STATUS.WITHDRAWN, withdrawn_at: new Date() },
       });
+      
       // A withdrawn candidate no longer attends their scheduled interviews.
       await tx.interviews.updateMany({
         where: { application_id: id, deleted_at: null, status: INTERVIEW_STATUS.SCHEDULED },
